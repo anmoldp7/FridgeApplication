@@ -1,9 +1,9 @@
 -module(fridge).
 -compile(export_all).
 
-%% For starting fridge server.
-start() ->
-    spawn(?MODULE, fridge_server, [[]]).
+%% For starting and adding a monitor on fridge server.
+start_monitor() ->
+    spawn_monitor(?MODULE, fridge_server, [[]]).
 
 %% Fridge server program. TCO, thus no overhead due to recursive function calls.
 fridge_server(X) ->
