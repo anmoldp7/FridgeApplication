@@ -1,5 +1,5 @@
 # Fridge Server
-Based on the program  [**Learn You Some Erlang**](https://learnyousomeerlang.com/content) chapters
+Based on the program in  [**Learn You Some Erlang**](https://learnyousomeerlang.com/content) chapters
 on multiprocessing and concurrency.
 
 ## Requirements
