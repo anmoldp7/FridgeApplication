@@ -19,7 +19,8 @@ fridge_server(X) ->
 		end,
 		fridge_server(X -- [Item]);
 	    Message =/= take andalso Message =/= store ->
-		io:format("Illegal request received.")
+		io:format("Illegal request received."),
+		fridge_server(X)
 	    end;
 	{Pid, display} ->
 	    Pid ! X,
