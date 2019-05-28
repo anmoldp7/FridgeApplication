@@ -4,6 +4,8 @@
 -export([store_food / 2, delete_food / 2, list_food/ 1, shutdown_fridge / 1]).
 -export([handle_call / 3, handle_cast / 2]).
 
+-behavior(gen_server).
+
 init(X) -> X.
 
 start(InitialState) -> mol_server:start(?MODULE, InitialState).
