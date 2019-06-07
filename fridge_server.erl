@@ -1,40 +1,43 @@
 -module(fridge_server).
 
--export([start / 0, start / 1, start_link / 0, start_link / 1, init / 1]).
+-export([start / 0, start_link / 0]).
 -export([store_food / 2, delete_food / 2, list_food/ 1, shutdown_fridge / 1]).
--export([handle_call / 3, handle_cast / 2]).
+-export([init / 1, handle_call / 3, handle_cast / 2, handle_info / 2, terminate / 2, code_change / 3]).
 
 -behavior(gen_server).
 
-init(X) -> X.
+%% Public API
+start() -> gen_server:start({local, ?MODULE}, ?MODULE, [], []).
+start_link() -> gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
-start(InitialState) -> mol_server:start(?MODULE, InitialState).
-start_link(InitialState) -> mol_server:start_link(?MODULE, InitialState).
+store_food(Pid, Food) -> gen_server:cast(Pid, {store, Food}).
 
-start() -> mol_server:start(?MODULE, []).
-start_link() -> mol_server:start_link(?MODULE, []).
+delete_food(Pid, Food) -> gen_server:cast(Pid, {delete, Food}).
 
-store_food(Pid, Food) -> mol_server:cast(Pid, {store, Food}).
+list_food(Pid) -> gen_server:call(Pid, list_food).
 
-delete_food(Pid, Food) -> mol_server:cast(Pid, {delete, Food}).
+shutdown_fridge(Pid) -> gen_server:call(Pid, terminate).
 
-list_food(Pid) -> mol_server:call(Pid, {list_food}).
+%% Server functions
+init([]) -> {ok, []}.
 
-shutdown_fridge(Pid) -> mol_server:call(Pid, {terminate}).
+handle_call(list_food, _From, State) ->
+	{reply, State, State};
+handle_call(terminate, _From, State) ->
+    {stop, normal, ok, State}.
 
-handle_call(State, {Pid, Ref}, {list_food}) ->
-    mol_server:reply({Pid, Ref}, State),
-    State;
-
-handle_call(_, {Pid, Ref}, {terminate}) ->
-    mol_server:reply({Pid, Ref}, "Shutting down fridge server."),
-    exit(normal).
-
-handle_cast(State, {store, Food}) ->
-    State ++ [Food];
-
-handle_cast(State, {delete, Food}) ->
+handle_cast({store, Food}, State) ->
+    {noreply, State ++ [Food]};
+handle_cast({delete, Food}, State) ->
     case lists:member(Food, State) of
-	true ->	State -- [Food];
-	false -> State
+		true  -> {noreply, State -- [Food]};
+		false -> {noreply, State}
     end.
+
+handle_info(Msg, State) ->
+	io:format("Unknown message received: ~p~n", [Msg]),
+	{noreply, State}.
+
+terminate(_Reason, _State) -> ok.
+
+code_change(_OldVsn, State, _Extra) -> {ok, State}.
